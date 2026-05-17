@@ -164,6 +164,15 @@ fn callgrind_filter(path: &Path, bytes: &[u8], writer: &mut impl Write) {
             }
         }
     }
+
+    if state == State::Header {
+        writeln!(
+            writer,
+            "WARNING: '{MARKER}' not found in output; dumping raw stderr:"
+        )
+        .unwrap();
+        writer.write_all(bytes).unwrap();
+    }
 }
 
 fn memcheck_filter(bytes: &[u8], writer: &mut impl Write) {
@@ -210,6 +219,15 @@ fn memcheck_filter(bytes: &[u8], writer: &mut impl Write) {
         let replaced = MEMCHECK_RM_NUMBERS_RE.replace_all(&replaced, "<__NUMBER__>");
         writeln!(writer, "{replaced}").unwrap();
     }
+
+    if state == State::Header {
+        writeln!(
+            writer,
+            "WARNING: '{MARKER}' not found in output; dumping raw stderr:"
+        )
+        .unwrap();
+        writer.write_all(bytes).unwrap();
+    }
 }
 
 fn cachegrind_filter(bytes: &[u8], writer: &mut impl Write) {
@@ -247,6 +265,15 @@ fn cachegrind_filter(bytes: &[u8], writer: &mut impl Write) {
 
         let replaced = CACHEGRIND_NUM_REFS_RE.replace_all(&rest, "$1<__FILTER__>");
         writeln!(writer, "{replaced}").unwrap();
+    }
+
+    if state == State::Header {
+        writeln!(
+            writer,
+            "WARNING: '{MARKER}' not found in output; dumping raw stderr:"
+        )
+        .unwrap();
+        writer.write_all(bytes).unwrap();
     }
 }
 
